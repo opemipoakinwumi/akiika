@@ -207,7 +207,7 @@ def main():
         st.title("Settings")
         
         topic = st.text_input("Search Topic:", value="technology")
-        max_articles = st.slider("Max Articles:", min_value=5, max_value=50, value=20)
+        max_articles = st.slider("Max Articles:", min_value=5, max_value=1000, value=20)
         
         # Advanced options in an expander
         with st.expander("Advanced Options"):
