@@ -84,71 +84,85 @@ def interactive_wordcloud(text):
     if text.strip():
         wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
         word_list = wordcloud.words_
+        
+        # Prepare data for the interactive word cloud
+        sizes = [int(val * 100) for val in word_list.values()]  # Scale sizes for better visualization
+        words = list(word_list.keys())
+        
+        # Create a Plotly scatter plot
         fig = go.Figure(data=[go.Scatter(
-            x=[1] * len(word_list),
-            y=list(word_list.keys()),
-            text=list(word_list.keys()),
-            mode='text',
-            textfont=dict(size=list(word_list.values()))
+            x=[1] * len(words),  # Place all words on the same x-axis
+            y=words,  # Words on the y-axis
+            text=words,  # Display words as text
+            mode='text',  # Display text only
+            textfont=dict(
+                size=sizes,  # Set font size based on word frequency
+                color='blue'  # Set text color
+            )
         )])
-        fig.update_layout(title="Interactive Word Cloud")
+        
+        # Update layout for better visualization
+        fig.update_layout(
+            title="Interactive Word Cloud",
+            xaxis=dict(showticklabels=False),  # Hide x-axis labels
+            yaxis=dict(showticklabels=False),  # Hide y-axis labels
+            hovermode=False  # Disable hover effects
+        )
+        
+        # Display the interactive word cloud
         st.plotly_chart(fig)
     else:
         st.warning("No text available to generate interactive word cloud.")
 
 # Main function for Streamlit app
 def main():
-    # Sidebar for navigation
-    st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Go to", ["Home", "About Us"])
+    st.title("AI-Powered News Sentiment Analyzer")
+    st.write("Enter a topic to analyze the sentiment of recent news articles.")
 
-    if page == "Home":
-        st.title("AI-Powered News Sentiment Analyzer")
-        st.write("Enter a topic to analyze the sentiment of recent news articles.")
+    # User input for topic
+    topic = st.text_input("Enter the topic you want to search for:", "technology")
 
-        # User input for topic
-        topic = st.text_input("Enter the topic you want to search for:", "technology")
+    if st.button("Analyze"):
+        articles = fetch_news(topic)
+        if articles:
+            summary = generate_summary(articles)
+            st.markdown(summary)
 
-        if st.button("Analyze"):
-            articles = fetch_news(topic)
-            if articles:
-                summary = generate_summary(articles)
-                st.markdown(summary)
+            all_text = " ".join([article['title'] + " " + article['summary'] for article in articles])
+            st.subheader("Word Cloud")
+            generate_wordcloud(all_text)
 
-                all_text = " ".join([article['title'] + " " + article['summary'] for article in articles])
-                st.subheader("Word Cloud")
-                generate_wordcloud(all_text)
+            st.subheader("Interactive Word Cloud")
+            interactive_wordcloud(all_text)
 
-                st.subheader("Interactive Word Cloud")
-                interactive_wordcloud(all_text)
+    # About Us section in the sidebar
+    st.sidebar.title("About Us")
+    st.sidebar.write("Welcome to the **AI-Powered News Sentiment Analyzer**! This tool is designed to help you understand the sentiment behind recent news articles on any topic of your choice.")
 
-    elif page == "About Us":
-        st.title("About Us")
-        st.write("Welcome to the **AI-Powered News Sentiment Analyzer**! This tool is designed to help you understand the sentiment behind recent news articles on any topic of your choice.")
+    st.sidebar.write("### Our Mission")
+    st.sidebar.write("Our mission is to provide users with a quick and easy way to analyze the sentiment of news articles, helping them stay informed about public opinion and media trends.")
 
-        st.write("### Our Mission")
-        st.write("Our mission is to provide users with a quick and easy way to analyze the sentiment of news articles, helping them stay informed about public opinion and media trends.")
+    st.sidebar.write("### How It Works")
+    st.sidebar.write("1. **Fetch News Articles**: The app fetches recent news articles from Google News RSS feeds based on your chosen topic.")
+    st.sidebar.write("2. **Analyze Sentiment**: Using Natural Language Processing (NLP), the app determines whether each article has a positive, negative, or neutral sentiment.")
+    st.sidebar.write("3. **Generate Insights**: The app provides a summary of the articles, including sentiment distribution and a word cloud for visual analysis.")
 
-        st.write("### How It Works")
-        st.write("1. **Fetch News Articles**: The app fetches recent news articles from Google News RSS feeds based on your chosen topic.")
-        st.write("2. **Analyze Sentiment**: Using Natural Language Processing (NLP), the app determines whether each article has a positive, negative, or neutral sentiment.")
-        st.write("3. **Generate Insights**: The app provides a summary of the articles, including sentiment distribution and a word cloud for visual analysis.")
+    st.sidebar.write("### Meet the Team")
+    st.sidebar.write("This project was created by a dedicated team of developers and data enthusiasts:")
+    st.sidebar.write("- **Opemipo Akinwumi**: Founder and Lead Developer")
+  
 
-        st.write("### Meet the Team")
-        st.write("This project was created by:")
-        st.write("- **Opemipo Akinwumi**: Founder and Lead Developer")
-        
+    st.sidebar.write("### Shoutout")
+    st.sidebar.write("Shoutout to [Ayodeji](https://ayodejiades.vercel.app/) for helping me out with errors.")
 
-        st.write("### Contact Us")
-        st.write("Have questions or feedback? We'd love to hear from you!")
-        st.write("📧 Email: support@newsanalyzer.com")
-        st.write("🌐 Website: [www.newsanalyzer.com](https://www.newsanalyzer.com)")
+    st.sidebar.write("### Contact Us")
+    st.sidebar.write("Have questions or feedback? We'd love to hear from you!")
+    st.sidebar.write("📧 Email: support@newsanalyzer.com")
+    st.sidebar.write("🌐 Website: [www.newsanalyzer.com](https://www.newsanalyzer.com)")
 
-        st.write("### Disclaimer")
-        st.write("This tool is for educational and informational purposes only. The sentiment analysis is based on automated algorithms and may not always reflect human judgment.")
-        
-        st.write("### Shoutout")
-        st.write("Shoutout to [Ayodeji](https://ayodejiades.vercel.app/) for helping me out with errors.")
+    st.sidebar.write("### Disclaimer")
+    st.sidebar.write("This tool is for educational and informational purposes only. The sentiment analysis is based on automated algorithms and may not always reflect human judgment.")
+
 # Run the Streamlit app
 if __name__ == "__main__":
     main()
