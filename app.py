@@ -8,6 +8,66 @@ from bs4 import BeautifulSoup
 from urllib.parse import quote  # For URL encoding
 import os
 
+# Inject custom CSS for modern styling
+st.markdown(
+    """
+    <style>
+    /* Main page styling */
+    .stApp {
+        background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+        color: #2c3e50;
+    }
+    /* Sidebar styling */
+    .css-1d391kg {
+        background-color: #2c3e50 !important;
+        color: #ffffff !important;
+    }
+    /* Button styling */
+    .stButton button {
+        background-color: #3498db;
+        color: white;
+        border-radius: 12px;
+        padding: 10px 24px;
+        font-size: 16px;
+        border: none;
+        transition: background-color 0.3s ease;
+    }
+    .stButton button:hover {
+        background-color: #2980b9;
+    }
+    /* Input box styling */
+    .stTextInput input {
+        background-color: #ecf0f1;
+        border-radius: 8px;
+        border: 1px solid #bdc3c7;
+        padding: 10px;
+    }
+    /* Header styling */
+    h1 {
+        color: #3498db;
+        font-size: 36px;
+        font-weight: bold;
+    }
+    h2 {
+        color: #2c3e50;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    h3 {
+        color: #2c3e50;
+        font-size: 22px;
+        font-weight: bold;
+    }
+    /* Word cloud container styling */
+    .stPlot {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Function to remove HTML tags
 def remove_html_tags(text):
     """Remove HTML tags from a string using BeautifulSoup."""
