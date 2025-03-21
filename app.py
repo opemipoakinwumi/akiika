@@ -31,7 +31,7 @@ if 'progress' not in st.session_state:
 
 # Cache the function to improve performance
 @st.cache_data(ttl=3600)  # Cache for 1 hour
-def fetch_news(topic, max_articles=20):
+def fetch_news(topic, max_articles=100):
     """Fetch news articles based on the provided topic."""
     encoded_topic = quote(topic)
     url = f"https://news.google.com/rss/search?q={encoded_topic}"
@@ -207,7 +207,7 @@ def main():
         st.title("Settings")
         
         topic = st.text_input("Search Topic:", value="technology")
-        max_articles = st.slider("Max Articles:", min_value=5, max_value=1000, value=20)
+        max_articles = st.slider("Max Articles:", min_value=10, max_value=1000, value=100)
         
         # Advanced options in an expander
         with st.expander("Advanced Options"):
@@ -259,7 +259,7 @@ def main():
                 
                 # Process articles with parallelization
                 total_articles = len(articles)
-                with ThreadPoolExecutor(max_workers=4) as executor:
+                with ThreadPoolExecutor(max_workers=min(8, total_articles)) as executor:
                     processed_articles = list(executor.map(
                         lambda x: process_article(x[1], x[0], total_articles),
                         enumerate(articles)
