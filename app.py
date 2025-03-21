@@ -8,6 +8,9 @@ from bs4 import BeautifulSoup
 from urllib.parse import quote  # For URL encoding
 import os
 
+# Set page config FIRST
+st.set_page_config(page_title="AI-Powered News Sentiment Analyzer", page_icon="📰")
+
 # Inject custom CSS for modern styling
 st.markdown(
     """
@@ -155,8 +158,6 @@ def interactive_wordcloud(text):
 
 # Main function for Streamlit app
 def main():
-    st.set_page_config(page_title="AI-Powered News Sentiment Analyzer", page_icon="📰")
-    
     # Sidebar for navigation
     st.sidebar.title("Navigation")
     page = st.sidebar.radio("Go to", ["Home", "About Us"])
@@ -196,8 +197,7 @@ def main():
         st.write("### Meet the Team")
         st.write("This project was created by a dedicated team of developers and data enthusiasts:")
         st.write("- **Opemipo Akinwumi**: Founder and Lead Developer")
-        st.write("- **AI & NLP Experts**: Our team of AI and NLP specialists who made this tool possible.")
-        st.write("- **Design Team**: The creative minds behind the user-friendly interface.")
+       
 
         st.write("### Contact Us")
         st.write("Have questions or feedback? We'd love to hear from you!")
@@ -207,6 +207,8 @@ def main():
         st.write("### Disclaimer")
         st.write("This tool is for educational and informational purposes only. The sentiment analysis is based on automated algorithms and may not always reflect human judgment.")
 
+        st.write("### Shoutout")
+        st.write("Shoutout to [Ayodeji](https://ayodejiades.vercel.app/) for helping me out with errors.")
 # Run the Streamlit app
 if __name__ == "__main__":
     main()
