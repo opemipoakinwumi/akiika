@@ -10,6 +10,7 @@ import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 import time
 import plotly.express as px
+import io
 
 # Set page config FIRST
 st.set_page_config(
@@ -114,9 +115,6 @@ def generate_word_cloud(text):
         width=800, 
         height=400, 
         background_color='white',
-        colormap='viridis',
-        contour_width=1,
-        contour_color='steelblue',
         max_words=100
     ).generate(text)
     
@@ -131,14 +129,7 @@ def plot_sentiment_distribution(df):
         sentiment_counts, 
         values='Count', 
         names='Sentiment', 
-        title='Sentiment Distribution',
-        color='Sentiment',
-        color_discrete_map={
-            'Positive': '#28a745',
-            'Neutral': '#17a2b8',
-            'Negative': '#dc3545'
-        },
-        hole=0.4
+        title='Sentiment Distribution'
     )
     return fig
 
@@ -165,12 +156,7 @@ def plot_sentiment_over_time(df):
         x='date', 
         y='Count', 
         color='Sentiment',
-        title='Sentiment Trends Over Time',
-        color_discrete_map={
-            'Positive': '#28a745',
-            'Neutral': '#17a2b8',
-            'Negative': '#dc3545'
-        }
+        title='Sentiment Trends Over Time'
     )
     return fig
 
@@ -182,50 +168,12 @@ def plot_polarity_subjectivity(df):
         y='subjectivity', 
         color='sentiment',
         hover_data=['title'],
-        title='Polarity vs Subjectivity',
-        color_discrete_map={
-            'Positive': '#28a745',
-            'Neutral': '#17a2b8',
-            'Negative': '#dc3545'
-        }
+        title='Polarity vs Subjectivity'
     )
     
     fig.update_layout(
         xaxis_title="Polarity (Negative ⟷ Positive)",
         yaxis_title="Subjectivity (Factual ⟷ Opinion)"
-    )
-    
-    return fig
-
-def interactive_word_cloud(wordcloud):
-    """Create an interactive word cloud visualization."""
-    if wordcloud is None:
-        return None
-        
-    word_list = wordcloud.words_
-    
-    # Prepare data for the interactive word cloud
-    words = list(word_list.keys())[:50]  # Limit to top 50 words
-    sizes = [int(val * 100) for val in list(word_list.values())[:50]]
-    
-    # Create a Plotly scatter plot
-    fig = go.Figure(data=[go.Scatter(
-        x=[i % 10 for i in range(len(words))],  # Create a grid layout
-        y=[i // 10 for i in range(len(words))],
-        text=words,
-        mode='text',
-        textfont=dict(
-            size=sizes,
-            color=['rgba(0, 0, 255, 0.8)' if s > 50 else 'rgba(0, 0, 255, 0.6)' for s in sizes]
-        ),
-        hoverinfo='text'
-    )])
-    
-    fig.update_layout(
-        title="Interactive Word Cloud",
-        xaxis=dict(showticklabels=False, showgrid=False),
-        yaxis=dict(showticklabels=False, showgrid=False),
-        plot_bgcolor='rgba(240, 240, 240, 0.5)'
     )
     
     return fig
@@ -253,23 +201,6 @@ def main():
     """Main function for the Streamlit app."""
     # Page header
     st.title("📰 AI-Powered News Sentiment Analyzer")
-    st.markdown("""
-    <style>
-    .stApp {
-        background-color: #f8f9fa;
-    }
-    .main {
-        padding: 2rem;
-    }
-    h1 {
-        color: #2c3e50;
-    }
-    .stSidebar {
-        background-color: #ffffff;
-        padding: 1rem;
-    }
-    </style>
-    """, unsafe_allow_html=True)
     
     # Sidebar configuration
     with st.sidebar:
@@ -300,7 +231,7 @@ def main():
         - Interactive visualizations
         - Trend analysis
         
-        Created by Opemipo Akinwumi with help from [Ayodeji Adesegun](https://ayodejiades.vercel.app/).
+        Created by Opemipo Akinwumi with help from [Ayodeji](https://ayodejiades.vercel.app/).
         """)
         
         st.markdown("---")
@@ -385,24 +316,32 @@ def main():
                 st.plotly_chart(fig_scatter, use_container_width=True)
         
         with tab3:
-            # Word cloud visualizations
+            # Word cloud visualization with download option
             all_text = " ".join([article['title'] + " " + article['summary'] for article in st.session_state.articles])
             wordcloud = generate_word_cloud(all_text)
             
             if wordcloud:
-                wc_col, interactive_col = st.columns(2)
+                st.subheader("Word Cloud")
                 
-                with wc_col:
-                    st.subheader("Word Cloud")
-                    plt.figure(figsize=(10, 5))
-                    plt.imshow(wordcloud, interpolation='bilinear')
-                    plt.axis('off')
-                    st.pyplot(plt)
+                # Create a figure for the word cloud
+                fig, ax = plt.subplots(figsize=(10, 5))
+                ax.imshow(wordcloud, interpolation='bilinear')
+                ax.axis('off')
                 
-                with interactive_col:
-                    st.subheader("Interactive Word Cloud")
-                    fig_wc = interactive_word_cloud(wordcloud)
-                    st.plotly_chart(fig_wc, use_container_width=True)
+                # Display the word cloud
+                st.pyplot(fig)
+                
+                # Create a download button for the word cloud image
+                buf = io.BytesIO()
+                fig.savefig(buf, format='png', dpi=300, bbox_inches='tight')
+                buf.seek(0)
+                
+                st.download_button(
+                    label="Download Word Cloud",
+                    data=buf,
+                    file_name=f"wordcloud_{topic}_{time.strftime('%Y%m%d')}.png",
+                    mime="image/png"
+                )
             else:
                 st.warning("Not enough text to generate word cloud.")
         
